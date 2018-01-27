@@ -52,14 +52,6 @@ public class Scanner {
 		RBRACE /* } */, LPIXEL /* << */, RPIXEL /* >> */, SEMI/* ; */, COMMA/* , */, DOT /* . */, EOF;
 	}
 
-	public static class Stem {
-		//default boolean values are false
-		public boolean LESS;
-		public boolean GREATER;
-		public boolean EQUAL;
-		public boolean NOT;
-		public boolean COLON;
-	}
 	/**
 	 * Class to represent Tokens.
 	 * 
@@ -327,7 +319,8 @@ public class Scanner {
 
 	}
 
-	 private enum State {START, IDENTIFIER, DIGIT, COMMENT};  //TODO:  this is incomplete
+	 private enum State {START, IDENTIFIER, INITZERO, INITNONZERO, DIGIT, COMMENT, FLOATLITERAL,
+	 INTEGERLITERAL};  //TODO:  this is incomplete
 	 public StringBuilder temp = new StringBuilder();
 	 
 	 //TODO: Modify this to deal with the entire lexical specification
@@ -351,85 +344,71 @@ public class Scanner {
 						}
 						break;
 						case EOFChar: {
-							tokens.add(new Token(Kind.EOF, startPos, 0));
-							pos++; // next iteration will terminate loop
+							tokens.add(new Token(Kind.EOF, startPos, 0));pos++; // next iteration will terminate loop
 						}
 						break;
 						case ';': {
-							tokens.add(new Token(Kind.SEMI, startPos, pos - startPos + 1));
-							pos++;
+							tokens.add(new Token(Kind.SEMI, startPos, pos - startPos + 1));pos++;
 						}
 						break;
 						case '(': {
-							//LPAREN MY ADDON
-							tokens.add(new Token(Kind.LPAREN, startPos, pos - startPos + 1));
-							pos++;
+							tokens.add(new Token(Kind.LPAREN, startPos, pos - startPos + 1));pos++;
 						}
 						break;
 						case ')': {
-							//LPAREN MY ADDON
-							tokens.add(new Token(Kind.RPAREN, startPos, pos - startPos + 1));
-							pos++;
+							tokens.add(new Token(Kind.RPAREN, startPos, pos - startPos + 1));pos++;
 						}
 						break;
 						case '[': {
-							// MY ADDON
-							tokens.add(new Token(Kind.LSQUARE, startPos, pos - startPos + 1));
-							pos++;
+							tokens.add(new Token(Kind.LSQUARE, startPos, pos - startPos + 1));pos++;
 						}
 						break;
 						case ']': {
-							//MY ADDON
-							tokens.add(new Token(Kind.RSQUARE, startPos, pos - startPos + 1));
-							pos++;
+							tokens.add(new Token(Kind.RSQUARE, startPos, pos - startPos + 1));pos++;
 						}
 						break;
 						case ',': {
-							//Comma MY ADDON
-							tokens.add(new Token(Kind.COMMA, startPos, pos - startPos + 1));
-							pos++;
+							tokens.add(new Token(Kind.COMMA, startPos, pos - startPos + 1));pos++;
 						}
 						break;
 						case '{': {
-							//RBRACE MY ADDON
-							tokens.add(new Token(Kind.LBRACE, startPos, pos - startPos + 1));
-							pos++;
+							tokens.add(new Token(Kind.LBRACE, startPos, pos - startPos + 1));pos++;
 						}
 						break;
 						case '}': {
-							//RBRACE MY ADDON
-							tokens.add(new Token(Kind.RBRACE, startPos, pos - startPos + 1));
-							pos++;
+							tokens.add(new Token(Kind.RBRACE, startPos, pos - startPos + 1));pos++;
 						}
 						break;
 						case '.': {
-							tokens.add(new Token(Kind.DOT, startPos, pos - startPos + 1));
+							if(chars[pos+1]>='0'&&chars[pos+1]<='9'){
+								//as when you enter FPLITERAL, you enter with what's after
+								// DOT //so don't extra increment pos
+								state=State.FLOATLITERAL;
+							}
+							else{
+								tokens.add(new Token(Kind.DOT, startPos, pos - startPos + 1));
+							}
 							pos++;
 						}
 						break;
 						case '?': {
-							tokens.add(new Token(Kind.OP_QUESTION, startPos, pos - startPos + 1));
-							pos++;
+							tokens.add(new Token(Kind.OP_QUESTION, startPos, pos - startPos + 1));pos++;
 						}
 						break;
 						case '&': {
-							tokens.add(new Token(Kind.OP_AND, startPos, pos - startPos + 1));
-							pos++;
+							tokens.add(new Token(Kind.OP_AND, startPos, pos - startPos + 1));pos++;
 						}
 						break;
 						case '+': {
-							tokens.add(new Token(Kind.OP_PLUS, startPos, pos - startPos + 1));
-							pos++;
+							tokens.add(new Token(Kind.OP_PLUS, startPos, pos - startPos + 1));pos++;
 						}
 						break;
 						case '-': {
-							tokens.add(new Token(Kind.OP_MINUS, startPos, pos - startPos + 1));
-							pos++;
+							tokens.add(new Token(Kind.OP_MINUS, startPos, pos - startPos + 1));pos++;
 						}
 						break;
 						case '|': {
-							tokens.add(new Token(Kind.OP_OR, startPos, pos - startPos + 1));
-							pos++;
+							tokens.add(new Token(Kind.OP_OR, startPos, pos - startPos + 1));pos++;
 						}
 						break;
 						case '/': {
@@ -447,13 +426,11 @@ public class Scanner {
 						}
 						break;
 						case '%': {
-							tokens.add(new Token(Kind.OP_MOD, startPos, pos - startPos + 1));
-							pos++;
+							tokens.add(new Token(Kind.OP_MOD, startPos, pos - startPos + 1));pos++;
 						}
 						break;
 						case '@': {
-							tokens.add(new Token(Kind.OP_OR, startPos, pos - startPos + 1));
-							pos++;
+							tokens.add(new Token(Kind.OP_OR, startPos, pos - startPos + 1));pos++;
 						}
 						break;
 						case '*': {
@@ -502,9 +479,10 @@ public class Scanner {
 							if(pos+1<chars.length && chars[pos+1]=='='){
 								pos++;
 								tokens.add(new Token(Kind.OP_EQ, startPos, pos - startPos + 1));
+								pos++;
 							}
 							//AS NO OPERATOR FOR =
-							pos++;
+							else error(pos, line(pos), posInLine(pos), "illegal char");
 
 						}
 						break;
@@ -538,19 +516,21 @@ public class Scanner {
 							{	//IDENTIFIER START CHECKING
 								state = State.IDENTIFIER;
 								temp.append(chars[pos]);
-								pos++;
 
 							}
-//							else if(){
-//								//DIGITS CHECKING
-//								state = State.DIGIT;
-//
-//							}
+							else if(chars[pos]=='0'){
+								//DIGITS CHECKING
+								state = State.INITZERO;
+
+							}
+							else if(chars[pos]>='1'&&chars[pos]<='9'){
+								state = State.INITNONZERO;
+							}
 							else{
 								error(pos, line(pos), posInLine(pos), "illegal char");
 
 							}
-
+							pos++;
 						}
 
 					}//switch ch
@@ -600,6 +580,69 @@ public class Scanner {
 					pos++;
 				}
 				break;
+				case INITNONZERO: {
+					if(chars[pos+1]>='0' && chars[pos+1]<='9'){
+						state = State.INTEGERLITERAL;
+					}
+					else if(chars[pos+1]=='.'){
+						state = State.FLOATLITERAL;pos++;
+					}
+					else{
+						tokens.add(new Token(Kind.INTEGER_LITERAL,startPos,pos-startPos+1));
+					}
+					pos++;
+				}
+				break;
+				case INITZERO: {
+					if(chars[pos+1]=='.'){
+						state = State.FLOATLITERAL;pos++;
+					}
+					else{
+						tokens.add(new Token(Kind.INTEGER_LITERAL,startPos, pos-startPos+1));
+					}
+					pos++;
+				}
+				break;
+				case INTEGERLITERAL: {
+					if(ch>='0' && ch<='9'){
+						state = State.INTEGERLITERAL;
+					}
+					else if(ch=='.'){
+						state = State.FLOATLITERAL;
+					}
+					else{
+						try{
+							Integer.valueOf(String.copyValueOf(chars, startPos, pos-startPos+1));
+						}
+						catch(NumberFormatException e){
+							error(pos,line(pos), posInLine(pos), "integer out of bounds");
+						}
+						tokens.add(new Token(Kind.INTEGER_LITERAL,startPos, pos-startPos+1));
+					}
+					pos++;
+
+				}
+				break;
+				case FLOATLITERAL: {
+					//when you enter you've already seen "(num*|0)."
+					//handle stuff after dot
+					//can take length digit, basically same processing as int
+					if(ch>='0'&&ch<='9'){
+						state = State.FLOATLITERAL;
+					}
+					else{
+						try{
+							Float.valueOf(String.copyValueOf(chars, startPos, pos-startPos+1));
+						}
+						catch(NumberFormatException e){
+							error(pos,line(pos), posInLine(pos), "float out of bounds");
+						}
+						tokens.add(new Token(Kind.FLOAT_LITERAL,startPos, pos-startPos+1));
+					}
+					pos++;
+
+				}
+				break;
 				default: {
 					error(pos, 0, 0, "undefined state");
 				}
@@ -608,7 +651,6 @@ public class Scanner {
 			
 		return this;
 	}
-
 
 
 	private void error(int pos, int line, int posInLine, String message) throws LexicalException {
