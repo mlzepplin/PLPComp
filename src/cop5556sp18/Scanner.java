@@ -319,7 +319,7 @@ public class Scanner {
 
 	}
 
-	 private enum State {START, IDENTIFIER, INITZERO, INITNONZERO, DIGIT, COMMENT, FLOATLITERAL,
+	 private enum State {START, IDENTIFIER, COMMENT, FLOATLITERAL,
 	 INTEGERLITERAL};  //TODO:  this is incomplete
 	 public StringBuilder temp = new StringBuilder();
 	 
@@ -519,12 +519,25 @@ public class Scanner {
 
 							}
 							else if(chars[pos]=='0'){
-								//DIGITS CHECKING
-								state = State.INITZERO;
+								if(chars[pos+1]=='.'){
+									state = State.FLOATLITERAL;pos++;
+								}
+								else{
+									System.out.println("start"+startPos + " end:"+pos);
+									tokens.add(new Token(Kind.INTEGER_LITERAL,startPos, pos-startPos+1));
+								}
 
 							}
 							else if(chars[pos]>='1'&&chars[pos]<='9'){
-								state = State.INITNONZERO;
+								if(chars[pos+1]>='0' && chars[pos+1]<='9'){
+									state = State.INTEGERLITERAL;
+								}
+								else if(chars[pos+1]=='.'){
+									state = State.FLOATLITERAL;pos++;
+								}
+								else{
+									tokens.add(new Token(Kind.INTEGER_LITERAL,startPos,pos-startPos+1));
+								}
 							}
 							else{
 								error(pos, line(pos), posInLine(pos), "illegal char");
@@ -580,66 +593,50 @@ public class Scanner {
 					pos++;
 				}
 				break;
-				case INITNONZERO: {
-					if(chars[pos+1]>='0' && chars[pos+1]<='9'){
-						state = State.INTEGERLITERAL;
-					}
-					else if(chars[pos+1]=='.'){
-						state = State.FLOATLITERAL;pos++;
-					}
-					else{
-						tokens.add(new Token(Kind.INTEGER_LITERAL,startPos,pos-startPos+1));
-					}
-					pos++;
-				}
-				break;
-				case INITZERO: {
-					if(chars[pos+1]=='.'){
-						state = State.FLOATLITERAL;pos++;
-					}
-					else{
-						tokens.add(new Token(Kind.INTEGER_LITERAL,startPos, pos-startPos+1));
-					}
-					pos++;
-				}
-				break;
 				case INTEGERLITERAL: {
 					if(ch>='0' && ch<='9'){
-						state = State.INTEGERLITERAL;
+						state = State.INTEGERLITERAL;pos++;
 					}
 					else if(ch=='.'){
-						state = State.FLOATLITERAL;
+						state = State.FLOATLITERAL;pos++;
 					}
 					else{
 						try{
-							Integer.valueOf(String.copyValueOf(chars, startPos, pos-startPos+1));
+							//why only pos-StartPos - as not supposed to include the curren chracter
+							System.out.println(String.copyValueOf(chars, startPos, pos-startPos));
+							Integer.valueOf(String.copyValueOf(chars, startPos, pos-startPos));
 						}
 						catch(NumberFormatException e){
+							pos--; // as error is to be thrown from where int ended
 							error(pos,line(pos), posInLine(pos), "integer out of bounds");
 						}
-						tokens.add(new Token(Kind.INTEGER_LITERAL,startPos, pos-startPos+1));
+						tokens.add(new Token(Kind.INTEGER_LITERAL,startPos, pos-startPos));
+						state = State.START;
+						//Don't increment pos here, as the character you saw wasn't a number
+						//and that very character would need to be refered to in start state
 					}
-					pos++;
 
 				}
 				break;
 				case FLOATLITERAL: {
 					//when you enter you've already seen "(num*|0)."
-					//handle stuff after dot
 					//can take length digit, basically same processing as int
 					if(ch>='0'&&ch<='9'){
-						state = State.FLOATLITERAL;
+						state = State.FLOATLITERAL;pos++;
 					}
 					else{
 						try{
-							Float.valueOf(String.copyValueOf(chars, startPos, pos-startPos+1));
+							Float.valueOf(String.copyValueOf(chars, startPos, pos-startPos));
 						}
 						catch(NumberFormatException e){
+							pos--;// as error is to be thrown from where float ended
 							error(pos,line(pos), posInLine(pos), "float out of bounds");
 						}
-						tokens.add(new Token(Kind.FLOAT_LITERAL,startPos, pos-startPos+1));
+						tokens.add(new Token(Kind.FLOAT_LITERAL,startPos, pos-startPos));
+						state = State.START;
+						//Don't increment pos here, as the character you saw wasn't a number
+						//and that very character would need to be refered in start state
 					}
-					pos++;
 
 				}
 				break;
