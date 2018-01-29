@@ -181,10 +181,23 @@ package cop5556sp18;
 
      @Test
      public void testComments() throws LexicalException{
-         String input = "/*dbmsdb*jkafha/jafkgf*/";
+         String input = "/*sfkhss*ll/hfks*/";
          Scanner scanner = new Scanner(input).scan();
          show(input);
          show(scanner);
+         checkNextIsEOF(scanner);
+     }
+
+     @Test
+     public void testNotComment() throws LexicalException{
+         String input = "/*fgh*";
+         Scanner scanner = new Scanner(input).scan();
+         show(input);
+         show(scanner);
+         checkNext(scanner, OP_DIV, 0, 1, 1, 1);
+         checkNext(scanner, OP_TIMES, 1, 1, 1, 2);
+         checkNext(scanner, IDENTIFIER, 2, 3, 1, 3);
+         checkNext(scanner, OP_TIMES, 5, 1, 1, 6);
          checkNextIsEOF(scanner);
      }
 
@@ -217,255 +230,45 @@ package cop5556sp18;
          checkNextIsEOF(scanner);
      }
 
-     //PATHAKS
      @Test
-     public void test3() throws LexicalException {
-         String input = "  abc";  //The input is the empty string.  This is legal
-         show(input);        //Display the input
-         Scanner scanner = new Scanner(input).scan();  //Create a Scanner and initialize it
-         checkNext(scanner, IDENTIFIER, 2, 3);
-         show(scanner);   //Display the Scanner
-
-     }
-     @Test
-     public void test7() throws LexicalException {
-         String input = "abcwhile";  //The input is the empty string.  This is illegal
-         show(input);        //Display the input
-
-
-
-         show(input);        //Display the input
-         Scanner scanner = new Scanner(input).scan();  //Create a Scanner and initialize it
-         checkNext(scanner, IDENTIFIER, 0, 8);
-         show(scanner);   //Display the Scanner
-
-     }
-     @Test
-     public void test11() throws LexicalException {
-         String input = "green=123>=34*polar_a";  //The input is the empty string.  This is legal
-         show(input);        //Display the input
-         thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
-         try {
-             new Scanner(input).scan();
-         } catch (LexicalException e) {  //
-             show(e);
-             assertEquals(5,e.getPos());
-             throw e;
-         }
-
-     }
-
-     @Test
-     public void test32() throws LexicalException
+     public void testFloat() throws LexicalException
      {
-         String input = "7867b 2147483647";
+         String input = ".05";
          show(input);
          Scanner scanner = new Scanner(input).scan();
          show(scanner);
-         checkNext(scanner,INTEGER_LITERAL,0,4,1,1);
-         checkNext(scanner,IDENTIFIER,4,1,1,5);
-         checkNext(scanner, INTEGER_LITERAL, 6, 10, 1, 7);
-         checkNextIsEOF(scanner);
-     }
-
-     @Test
-     public void test28() throws LexicalException
-     {
-         String input = "000.05";
-         show(input);
-         Scanner scanner = new Scanner(input).scan();
-         show(scanner);
-         checkNext(scanner,INTEGER_LITERAL,0,1);
-         checkNext(scanner,INTEGER_LITERAL,1,1);
-         checkNext(scanner,FLOAT_LITERAL,2,4);
-
-         checkNextIsEOF(scanner);
-     }
-
-
-
-
-
-     @Test
-     public void test6() throws LexicalException {
-         String input = "M=cos/x;\n widthY**while)";  //The input is the empty string.  This is legal
-         show(input);        //Display the input
-
-         thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
-         try {
-             new Scanner(input).scan();
-         } catch (LexicalException e) {  //
-             show(e);
-             assertEquals(1,e.getPos());
-             throw e;
-         }
-
-
-
-     }
-
-
-
-
-     @Test
-     public void test29() throws LexicalException
-     {
-         String input = "Z=\"\b\";";
-         //Scanner scanner = new Scanner(input).scan();
-         show(input);
-
-
-         thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
-         try {
-             new Scanner(input).scan();
-         } catch (LexicalException e) {  //
-             show(e);
-             assertEquals(1,e.getPos());
-             throw e;
-         }
-     }
-
-     @Test
-     public void test21() throws LexicalException
-     {
-         String input = "0.0aA6";
-         //Scanner scanner = new Scanner(input).scan();
-         show(input);
-         Scanner scanner = new Scanner(input).scan();
          checkNext(scanner,FLOAT_LITERAL,0,3);
-         checkNext(scanner,IDENTIFIER,3,3);
-         //checkNext(scanner,INTEGER_LITERAL,5,1);
-         show(scanner);
-     }
-
-
-
-
-
-
-
-
-     @Test
-     public void test10() throws LexicalException {
-         String input = "write==Z->zzz?";  //The input is the empty string.  This is legal
-         show(input);        //Display the input
-         Scanner scanner = new Scanner(input).scan();
-         checkNext(scanner,KW_write,0,5);
-         checkNext(scanner,OP_EQ,5,2);
-         checkNext(scanner,KW_Z,7,1);
-         checkNext(scanner,OP_MINUS,8,1);
-         checkNext(scanner,OP_GT,9,1);
-
-         checkNext(scanner,IDENTIFIER,10,3);
-         checkNext(scanner,OP_QUESTION,13,1);
-
-         show(scanner);
-     }
-
-     @Test
-     public void test37() throws LexicalException{
-
-         String input = "/'0'";
-         show(input);
-         thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
-         try{
-             Scanner scanner = new Scanner(input).scan();
-         }
-         catch (LexicalException e) {
-             show(e);
-             assertEquals(1,e.getPos());
-             throw e;
-         }
-     }
-
-
-
-
-
-
-
-
-     @Test
-     public void test4() throws LexicalException {
-         String input = "\nabc";
-         show(input);
-         Scanner scanner = new Scanner(input).scan();
-
-         show(scanner);   //Display the Scanner
-     }
-
-     @Test
-     public void test5() throws LexicalException {
-         String input = "\r\nabc ab \rbc \r\rcosi\n\nxy\nsin_y\r\n";  //The input is the empty string.  This is legal
-         show(input);        //Display the input
-         Scanner scanner = new Scanner(input).scan();  //Create a Scanner and initialize it
-         checkNext(scanner, IDENTIFIER, 2, 3);
-         checkNext(scanner, IDENTIFIER,6,2);
-         checkNext(scanner, IDENTIFIER,10,2);
-         checkNext(scanner, IDENTIFIER,15,4);
-         checkNext(scanner, IDENTIFIER,21,2);
-         checkNext(scanner, IDENTIFIER,24,5);
-         show(scanner);   //Display the Scanner
-
-     }
-
-     @Test
-     public void test39() throws LexicalException {
-         String input = "28c 938472093482\n";
-         show(input);
-         thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
-         try {
-             Scanner scanner = new Scanner(input).scan();
-             show(scanner);
-         } catch (LexicalException e) {
-             show(e);
-             assertEquals(15,e.getPos());
-             throw e;
-         }
-     }
-
-     @Test
-     public void test38() throws LexicalException{
-         String input = "falsey(abcd)01 00\r\npqrs if0!=cart_ytrue filename";
-         Scanner scanner = new Scanner(input).scan();
-         show(scanner);
-         checkNext(scanner,IDENTIFIER,0,6);
-         checkNext(scanner,LPAREN,6,1);
-         checkNext(scanner, IDENTIFIER,7,4);
-         checkNext(scanner,RPAREN,11,1);
-         checkNext(scanner, INTEGER_LITERAL,12,1);
-         checkNext(scanner, INTEGER_LITERAL,13,1);
-         checkNext(scanner, INTEGER_LITERAL,15,1);
-         checkNext(scanner, INTEGER_LITERAL,16,1);
-         checkNext(scanner, IDENTIFIER,19,4);
-         checkNext(scanner, IDENTIFIER,24,3);
-         checkNext(scanner, OP_NEQ,27,2);
-         checkNext(scanner, IDENTIFIER,29,10);
-         checkNext(scanner,KW_filename,40,8);
          checkNextIsEOF(scanner);
-
      }
-
 
      @Test
-     public void test56() throws LexicalException{
-
-         String input = "/'0'";
+     public void testFloatAndRest() throws LexicalException
+     {
+         String input = "0.1.abc";
          show(input);
-         thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
-         try{
-             Scanner scanner = new Scanner(input).scan();
-         }
-         catch (LexicalException e) {
-             show(e);
-             assertEquals(1,e.getPos());
-             throw e;
-         }
+         Scanner scanner = new Scanner(input).scan();
+         show(scanner);
+         checkNext(scanner,FLOAT_LITERAL,0,3);
+         checkNext(scanner,DOT,3,1);
+         checkNext(scanner,IDENTIFIER,4,3);
+
+         checkNextIsEOF(scanner);
      }
 
+     @Test
+     public void testFloatAndRest2() throws LexicalException
+     {
+         String input = "0.1j1.bc";
+         show(input);
+         Scanner scanner = new Scanner(input).scan();
+         show(scanner);
+         checkNext(scanner,FLOAT_LITERAL,0,3);
+         checkNext(scanner,IDENTIFIER,3,2);
+         checkNext(scanner,DOT,5,1);
+         checkNext(scanner,IDENTIFIER,6,2);
 
-
-
+         checkNextIsEOF(scanner);
+     }
 
 
  }

@@ -275,6 +275,7 @@ public class Scanner {
 	 */
 	private int nextTokenPos = 0;
 
+
 	Scanner(String inputString) {
 		int numChars = inputString.length();
 		this.chars = Arrays.copyOf(inputString.toCharArray(), numChars + 1); // input string terminated with null char
@@ -551,31 +552,30 @@ public class Scanner {
 				break;
 				case IDENTIFIER: {
 
-					if(Character.isJavaIdentifierPart(chars[pos]) && chars[pos]!= EOFChar && chars[pos]!='\b')
-					{
-						temp.append(chars[pos]);
+					if(Character.isJavaIdentifierPart(ch) && ch!= EOFChar && ch!='\b')
+					{	//building string with what we see as valid ident character
+						temp.append(ch);pos++;
 						state=State.IDENTIFIER;
-						pos++;
-
 					}
 					else
 					{
-						if(keyWord.containsKey(temp.toString()))
+						if(temp.toString().equals("false") || temp.toString().equals("true"))
 						{
-							tokens.add(new Token(keyWord.get(temp.toString()),pos-temp.length(),temp.length()));
+							tokens.add(new Token(Kind.BOOLEAN_LITERAL, pos-temp.length(), temp.length()));
 
 						}
-						else if(temp.toString().equals("true") || temp.toString().equals("false"))
+						else if(keyWord.containsKey(temp.toString()))
 						{
-							tokens.add(new Token(Kind.BOOLEAN_LITERAL,pos-temp.length(), temp.length()));
+							tokens.add(new Token(keyWord.get(temp.toString()), pos-temp.length(), temp.length()));
 
 						}
 						else
 						{
-							tokens.add(new Token(Kind.IDENTIFIER,pos-temp.length(), temp.length()));
+							tokens.add(new Token(Kind.IDENTIFIER, pos-temp.length(), temp.length()));
 
 						}
 						state=State.START;
+						//clearing the string builder buffer
 						temp.setLength(0);
 					}
 				}
@@ -583,14 +583,20 @@ public class Scanner {
 				case COMMENT: {
 					//when you reach Comment state, '/*' would already be parsed
 					if(ch=='*' && pos+1<chars.length && chars[pos+1]=='/'){
+						pos+=2;
+						state = State.START;
+					}
+					else if(ch==EOFChar){ //THE EOF CHARACTER MET BEFORE COMMENT CLOSED
+						//SO WAS NOT A COMMENT, BACKTRACK
+						tokens.add(new Token(Kind.OP_DIV,startPos,1));
+						tokens.add(new Token(Kind.OP_TIMES,startPos+1,1));
+						pos = startPos+2;
+						state = State.START;
+					}
+					else{
 						pos++;
-						state = State.START;
 					}
-					else if(ch==EOFChar){ //THE EOF CHARACTER CASE
-						state = State.START;
-						tokens.add(new Token(Kind.EOF, pos, 0));
-					}
-					pos++;
+
 				}
 				break;
 				case INTEGERLITERAL: {
