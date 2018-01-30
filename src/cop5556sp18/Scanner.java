@@ -16,8 +16,8 @@ package cop5556sp18;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
-//import java.util.HashMap;
+
+
 
 public class Scanner {
 
@@ -44,7 +44,7 @@ public class Scanner {
 		KW_polar_a/* polar_a*/, KW_polar_r/* polar_r*/, KW_abs/* abs */, KW_sin/* sin*/, KW_cos/* cos */, 
 		KW_atan/* atan */, KW_log/* log */, KW_image/* image */, KW_int/* int */, KW_float /* float */, 
 		KW_boolean/* boolean */, KW_filename/* filename */, KW_red /* red */, KW_blue /* blue */, 
-		KW_green /* green */, KW_alpha /* alpha*/, KW_while /* while */, KW_if /* if */, OP_ASSIGN/* := */, 
+		KW_green /* green */, KW_alpha /* alpha*/, KW_while /* while */, KW_if /* if */,KW_sleep /*sleep*/, OP_ASSIGN/* := */,
 		OP_EXCLAMATION/* ! */, OP_QUESTION/* ? */, OP_COLON/* : */, OP_EQ/* == */, OP_NEQ/* != */, 
 		OP_GE/* >= */, OP_LE/* <= */, OP_GT/* > */, OP_LT/* < */, OP_AND/* & */, OP_OR/* | */, 
 		OP_PLUS/* +*/, OP_MINUS/* - */, OP_TIMES/* * */, OP_DIV/* / */, OP_MOD/* % */, OP_POWER/* ** */, 
@@ -317,6 +317,7 @@ public class Scanner {
 		keyWord.put("if", Kind.KW_if);
 		keyWord.put("width", Kind.KW_width);
 		keyWord.put("height",Kind.KW_height);
+		keyWord.put("sleep",Kind.KW_sleep);
 
 	}
 
@@ -552,25 +553,21 @@ public class Scanner {
 				break;
 				case IDENTIFIER: {
 
-					if(Character.isJavaIdentifierPart(ch) && ch!= EOFChar && ch!='\b')
-					{	//building string with what we see as valid ident character
+					if(Character.isJavaIdentifierPart(ch) && ch!= EOFChar && ch!='\b') {
+						//building string with what we see as valid ident character
 						temp.append(ch);pos++;
 						state=State.IDENTIFIER;
 					}
-					else
-					{
-						if(temp.toString().equals("false") || temp.toString().equals("true"))
-						{
+					else {
+						if(temp.toString().equals("false") || temp.toString().equals("true")) {
 							tokens.add(new Token(Kind.BOOLEAN_LITERAL, pos-temp.length(), temp.length()));
 
 						}
-						else if(keyWord.containsKey(temp.toString()))
-						{
+						else if(keyWord.containsKey(temp.toString())) {
 							tokens.add(new Token(keyWord.get(temp.toString()), pos-temp.length(), temp.length()));
 
 						}
-						else
-						{
+						else {
 							tokens.add(new Token(Kind.IDENTIFIER, pos-temp.length(), temp.length()));
 
 						}
@@ -586,12 +583,16 @@ public class Scanner {
 						pos+=2;
 						state = State.START;
 					}
-					else if(ch==EOFChar){ //THE EOF CHARACTER MET BEFORE COMMENT CLOSED
+					else if(ch==EOFChar){
+						//THE EOF CHARACTER MET BEFORE COMMENT CLOSED
 						//SO WAS NOT A COMMENT, BACKTRACK
-						tokens.add(new Token(Kind.OP_DIV,startPos,1));
-						tokens.add(new Token(Kind.OP_TIMES,startPos+1,1));
-						pos = startPos+2;
-						state = State.START;
+						//tokens.add(new Token(Kind.OP_DIV,startPos,1));
+						//tokens.add(new Token(Kind.OP_TIMES,startPos+1,1));
+						//pos = startPos+2;
+						//state = State.START;
+
+						//NO BACKTRACKING
+						error(pos,line(pos), posInLine(pos), "invalid comment--> not closed");
 					}
 					else{
 						pos++;

@@ -53,12 +53,6 @@ package cop5556sp18;
          return token;
      }
 
-     Token checkNext(Scanner scanner, Scanner.Kind kind, int pos, int length) {
-         Token t = scanner.nextToken();
-         assertEquals(scanner.new Token(kind, pos, length), t);
-         return t;
-     }
-
      /**
       * Retrieves the next token and checks that its kind, position, length, line, and position in line
       * match the given parameters.
@@ -91,10 +85,6 @@ package cop5556sp18;
       * @param length
       * @return  the Token that was retrieved
       */
-
-
-
-
 
      /**
       * Simple test case with an empty program.  The only Token will be the EOF Token.
@@ -191,14 +181,21 @@ package cop5556sp18;
      @Test
      public void testNotComment() throws LexicalException{
          String input = "/*fgh*";
-         Scanner scanner = new Scanner(input).scan();
-         show(input);
-         show(scanner);
-         checkNext(scanner, OP_DIV, 0, 1, 1, 1);
-         checkNext(scanner, OP_TIMES, 1, 1, 1, 2);
-         checkNext(scanner, IDENTIFIER, 2, 3, 1, 3);
-         checkNext(scanner, OP_TIMES, 5, 1, 1, 6);
-         checkNextIsEOF(scanner);
+//         checkNext(scanner, OP_DIV, 0, 1, 1, 1);
+//         checkNext(scanner, OP_TIMES, 1, 1, 1, 2);
+//         checkNext(scanner, IDENTIFIER, 2, 3, 1, 3);
+//         checkNext(scanner, OP_TIMES, 5, 1, 1, 6);
+
+         //NOT SUPPOSED TO BAVKTRACK BUT JUST THROW ERROR
+         thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
+         try {
+             new Scanner(input).scan();
+         } catch (LexicalException e) {  //Catch the exception
+             show(e);                    //Display it
+             assertEquals(6,e.getPos()); //Check that it occurred in the expected position
+             throw e;                    //Rethrow exception so JUnit will see it
+         }
+
      }
 
      @Test
@@ -233,24 +230,38 @@ package cop5556sp18;
      @Test
      public void testFloat() throws LexicalException
      {
-         String input = ".05";
+         String input = ".07";
          show(input);
          Scanner scanner = new Scanner(input).scan();
          show(scanner);
-         checkNext(scanner,FLOAT_LITERAL,0,3);
+         checkNext(scanner,FLOAT_LITERAL,0,3,1,1);
          checkNextIsEOF(scanner);
      }
 
      @Test
      public void testFloatAndRest() throws LexicalException
      {
-         String input = "0.1.abc";
+         String input = "0.6.abc";
          show(input);
          Scanner scanner = new Scanner(input).scan();
          show(scanner);
-         checkNext(scanner,FLOAT_LITERAL,0,3);
-         checkNext(scanner,DOT,3,1);
-         checkNext(scanner,IDENTIFIER,4,3);
+         checkNext(scanner,FLOAT_LITERAL,0,3,1,1);
+         checkNext(scanner,DOT,3,1,1,4);
+         checkNext(scanner,IDENTIFIER,4,3,1,5);
+
+         checkNextIsEOF(scanner);
+     }
+
+     @Test
+     public void testFl() throws LexicalException
+     {
+         String input = "1...9";
+         show(input);
+         Scanner scanner = new Scanner(input).scan();
+         show(scanner);
+         checkNext(scanner,FLOAT_LITERAL,0,2,1,1);
+         checkNext(scanner,DOT,2,1,1,3);
+         checkNext(scanner,FLOAT_LITERAL,3,2,1,4);
 
          checkNextIsEOF(scanner);
      }
@@ -262,10 +273,10 @@ package cop5556sp18;
          show(input);
          Scanner scanner = new Scanner(input).scan();
          show(scanner);
-         checkNext(scanner,FLOAT_LITERAL,0,3);
-         checkNext(scanner,IDENTIFIER,3,2);
-         checkNext(scanner,DOT,5,1);
-         checkNext(scanner,IDENTIFIER,6,2);
+         checkNext(scanner,FLOAT_LITERAL,0,3,1,1);
+         checkNext(scanner,IDENTIFIER,3,2,1,4);
+         checkNext(scanner,DOT,5,1,1,6);
+         checkNext(scanner,IDENTIFIER,6,2,1,7);
 
          checkNextIsEOF(scanner);
      }
