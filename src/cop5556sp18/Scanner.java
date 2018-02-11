@@ -298,8 +298,8 @@ public class Scanner {
 		keyWord.put("polar_r", Kind.KW_polar_r);
 
 		keyWord.put("abs", Kind.KW_abs);
-		keyWord.put("sin", Kind.KW_cart_y);
-		keyWord.put("cos", Kind.KW_polar_a);
+		keyWord.put("sin", Kind.KW_sin);
+		keyWord.put("cos", Kind.KW_cos);
 		keyWord.put("atan", Kind.KW_atan);
 		keyWord.put("log", Kind.KW_log);
 
@@ -432,7 +432,7 @@ public class Scanner {
 						}
 						break;
 						case '@': {
-							tokens.add(new Token(Kind.OP_OR, startPos, pos - startPos + 1));pos++;
+							tokens.add(new Token(Kind.OP_AT, startPos, pos - startPos + 1));pos++;
 						}
 						break;
 						case '*': {
@@ -633,7 +633,11 @@ public class Scanner {
 					}
 					else{
 						try{
-							Float.valueOf(String.copyValueOf(chars, startPos, pos-startPos));
+							float f =Float.valueOf(String.copyValueOf(chars, startPos, pos-startPos));
+							if(Float.isInfinite(f)){
+								pos--;// as error is to be thrown from where float ended
+								error(pos,line(pos), posInLine(pos), "float infinite");
+							}
 						}
 						catch(NumberFormatException e){
 							pos--;// as error is to be thrown from where float ended
