@@ -59,7 +59,7 @@ public class Scanner {
 	 * instance is associated with a specific Scanner instance. We use this when
 	 * some token methods access the chars array in the associated Scanner.
 	 * 
-	 * @author Beverly Sanders
+	 * @author Beverly Sander
 	 *
 	 */
 	public class Token {
