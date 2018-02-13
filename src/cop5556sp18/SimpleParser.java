@@ -90,20 +90,17 @@ public class SimpleParser {
 
 			if(isKind(KW_image)){
 				match(KW_image);
+				match(IDENTIFIER);
 
-				if(isKind(IDENTIFIER)){
-					match(IDENTIFIER);
-
-					//the longer route
-					if(isKind(LSQUARE)){
-						match(LSQUARE);
-						expression();
-						match(COMMA);
-						expression();
-						match(RSQUARE);
-					}
-
+				//the longer route
+				if(isKind(LSQUARE)){
+					match(LSQUARE);
+					expression();
+					match(COMMA);
+					expression();
+					match(RSQUARE);
 				}
+
 			}
 			else{
 				match(type);
@@ -174,7 +171,7 @@ public class SimpleParser {
 
 		if(isKind(IDENTIFIER)){
 			match(IDENTIFIER);
-			if(isKind(LPAREN)) pixelSelector();
+			if(isKind(LSQUARE)) pixelSelector();
 		}
 		else{
 			match(color);
@@ -362,7 +359,7 @@ public class SimpleParser {
 			}
 			else if(isKind(IDENTIFIER)){
 				match(IDENTIFIER);
-				if(isKind(LPAREN)) pixelSelector();
+				if(isKind(LSQUARE)) pixelSelector();
 			}
 			else if(isKind(predefinedName)){
 				match(predefinedName);
@@ -414,7 +411,7 @@ public class SimpleParser {
 			expression();
 			match(COMMA);
 			expression();
-			match(RPAREN);
+			match(RSQUARE);
 		}
 		else{
 			throw new UnsupportedOperationException();
