@@ -392,12 +392,6 @@ public class SimpleParser {
 		match(RSQUARE);
 	}
 
-	public void pixelExpression() throws SyntaxException{
-		match(IDENTIFIER);
-		pixelSelector();
-	}
-
-
 
 	public void functionApplication() throws SyntaxException{
 		match(functionName);
@@ -489,9 +483,6 @@ public class SimpleParser {
 		}
 		throw new SyntaxException(t,"Syntax Error"); //TODO  give a better error message!
 	}
-
-	//ADDON
-
 	
 
 }
