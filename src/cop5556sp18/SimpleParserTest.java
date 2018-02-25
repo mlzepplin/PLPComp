@@ -88,6 +88,12 @@ public class SimpleParserTest {
 		parser.parse();
 	}
 
+	@Test
+	public void testA() throws LexicalException, SyntaxException {
+		String input = "b{int a;a:=5;while(a<5){a:=a+1;};}";
+		SimpleParser parser = makeParser(input);
+		parser.parse();
+	}
 
 
 }

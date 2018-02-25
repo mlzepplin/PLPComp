@@ -108,8 +108,7 @@ public class SimpleParser {
 			}
 
 		}
-		else
-		throw new UnsupportedOperationException();
+		else throw new SyntaxException(t,"from declaration()");
 	}
 
 	public void statement() throws SyntaxException{
@@ -121,7 +120,7 @@ public class SimpleParser {
 		else if(isKind(KW_if)) statementIf();
 		else if(isKind(KW_show)) statementShow();
 		else if(isKind(KW_sleep)) statementSleep();
-		else throw new UnsupportedOperationException();
+		else throw new SyntaxException(t,"from statement()");
 	}
 
 	public void statementInput() throws SyntaxException{
@@ -321,7 +320,7 @@ public class SimpleParser {
 		}
 		else{
 			//if it's not unaryExpressionNotPlusMinus too, error is being thrown
-			//by its susequent calls
+			//by its subsequent calls
 			unaryExpressionNotPlusMinus();
 		}
 	}
@@ -367,7 +366,7 @@ public class SimpleParser {
 			else if(isKind(LPIXEL)) {
 				pixelConstructor();
 			}
-			else throw new UnsupportedOperationException();
+			else throw new SyntaxException(t,"from primary()");
 	}
 
 	public void pixelConstructor() throws SyntaxException{
@@ -408,7 +407,7 @@ public class SimpleParser {
 			match(RSQUARE);
 		}
 		else{
-			throw new UnsupportedOperationException();
+			throw new SyntaxException(t,"from functionApplication()");
 		}
 
 
@@ -441,7 +440,7 @@ public class SimpleParser {
 			consume();
 			return tmp;
 		}
-		throw new SyntaxException(t,"Syntax Error"); //TODO  give a better error message!
+		throw new SyntaxException(t,"from match()"); //TODO  give a better error message!
 	}
 
 	//Override
@@ -453,7 +452,7 @@ public class SimpleParser {
 				return match(k);
 			}
 		}
-		throw new SyntaxException(t,"Syntax Error");
+		throw new SyntaxException(t,"from overridden match()");
 
 	}
 
@@ -461,7 +460,7 @@ public class SimpleParser {
 	private Token consume() throws SyntaxException {
 		Token tmp = t;
 		if (isKind( EOF)) {
-			throw new SyntaxException(t,"Syntax Error"); //TODO  give a better error message!  
+			throw new SyntaxException(t,"from consume()"); //TODO  give a better error message!
 			//Note that EOF should be matched by the matchEOF method which is called only in parse().  
 			//Anywhere else is an error. */
 		}
@@ -481,9 +480,9 @@ public class SimpleParser {
 		if (isKind(EOF)) {
 			return t;
 		}
-		throw new SyntaxException(t,"Syntax Error"); //TODO  give a better error message!
+		throw new SyntaxException(t,"from matchEOF()"); //TODO  give a better error message!
 	}
-	
+
 
 }
 
