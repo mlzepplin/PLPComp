@@ -14,8 +14,14 @@ package cop5556sp18.AST;
  */
 
 import cop5556sp18.Scanner.Token;
+import cop5556sp18.Types;
 
 public abstract class Statement extends ASTNode {
+
+	public Types.Type type;
+	public Declaration sourceDec;
+	public Declaration destDec;
+	public Declaration dec;
 
 	public Statement(Token firstToken) {
 		super(firstToken);

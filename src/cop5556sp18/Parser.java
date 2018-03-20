@@ -147,7 +147,7 @@ public class Parser {
 		else throw new SyntaxException(t,"from statement()");
 	}
 
-	public Statement statementInput(Token firstToken) throws SyntaxException{
+	public StatementInput statementInput(Token firstToken) throws SyntaxException{
 		match(KW_input);
 		Token destName = match(IDENTIFIER);
 		match(KW_from);
@@ -155,20 +155,20 @@ public class Parser {
 		Expression expression = expression();
 		return new StatementInput(firstToken,destName,expression);
 	}
-	public Statement statementWrite(Token firstToken) throws SyntaxException{
+	public StatementWrite statementWrite(Token firstToken) throws SyntaxException{
 		match(KW_write);
 		Token sourceName = match(IDENTIFIER);
 		match(KW_to);
 		Token destName = match(IDENTIFIER);
 		return new StatementWrite(firstToken,sourceName,destName);
 	}
-	public Statement statementAssignment(Token firstToken) throws SyntaxException{
+	public StatementAssign statementAssignment(Token firstToken) throws SyntaxException{
 		LHS lhs = lhs();
 		match(OP_ASSIGN);
 		Expression expression = expression();
 		return new StatementAssign(firstToken,lhs,expression);
 	}
-	public Statement statementWhile(Token firstToken) throws SyntaxException{
+	public StatementWhile statementWhile(Token firstToken) throws SyntaxException{
 		match(KW_while);
 		match(LPAREN);
 		Expression expression = expression();
@@ -177,7 +177,7 @@ public class Parser {
 		return new StatementWhile(firstToken,expression,block);
 
 	}
-	public Statement statementIf(Token firstToken) throws SyntaxException{
+	public StatementIf statementIf(Token firstToken) throws SyntaxException{
 		match(KW_if);
 		match(LPAREN);
 		Expression expression = expression();
@@ -186,12 +186,12 @@ public class Parser {
 		return new StatementIf(firstToken,expression,block);
 
 	}
-	public Statement statementShow(Token firstToken) throws SyntaxException{
+	public StatementShow statementShow(Token firstToken) throws SyntaxException{
 		match(KW_show);
 		Expression expression = expression();
 		return new StatementShow(firstToken,expression);
 	}
-	public Statement statementSleep(Token firstToken) throws SyntaxException{
+	public StatementSleep statementSleep(Token firstToken) throws SyntaxException{
 		match(KW_sleep);
 		Expression expression = expression();
 		return new StatementSleep(firstToken,expression);
