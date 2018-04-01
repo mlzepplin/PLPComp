@@ -80,6 +80,29 @@ public class TypeCheckerTest {
 		}
 	}
 
+	@Test
+	public void expression3() throws Exception {
+		String input = "X{ int x; int y; while (x == y) {int x;}; }";
+		typeCheck(input);
+	}
+
+	//ones that failed in submission
+	@Test
+	public void test4() throws Exception {
+		String input = "prog{ image var1; int var2; var2 := var1[0,0];}";
+		typeCheck(input);
+	}
+
+	@Test
+	public void test5() throws Exception {
+		String input = "prog{image var1; red( var1[1,1]) := 5; red( var1[1.0,1.0]) := 5;}";
+		typeCheck(input);
+	}
 
 
+	@Test
+	public void test6() throws Exception {
+		String input = "prog{image var; var[0,0] := 1; alpha(var[0,0]) := 1; red(var[0,0]) := 1; green(var[0,0]) := 1; blue(var[0,0]) := 1;}";
+		typeCheck(input);
+	}
 }

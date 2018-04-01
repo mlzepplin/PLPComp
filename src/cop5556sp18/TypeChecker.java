@@ -146,9 +146,10 @@ public class TypeChecker implements ASTVisitor {
 		pixelSelector.ex.visit(this,arg);
 		pixelSelector.ey.visit(this,arg);
 		if(pixelSelector.ex.type != pixelSelector.ey.type) throw new SemanticException(pixelSelector.firstToken,"pixel selctor");
-		if(pixelSelector.ex.type != Types.Type.INTEGER ||pixelSelector.ex.type != Types.Type.FLOAT ) throw new SemanticException(pixelSelector.firstToken,"pixel selctor");
+		if(pixelSelector.ex.type == Types.Type.INTEGER || pixelSelector.ex.type == Types.Type.FLOAT ) return null;
+		else throw new SemanticException(pixelSelector.firstToken,"pixel selctor 2");
 		//throw new UnsupportedOperationException();
-		return null;
+		//return null;
 	}
 
 	@Override
