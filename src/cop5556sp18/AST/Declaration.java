@@ -23,7 +23,7 @@ public class Declaration extends ASTNode {
 	public final String name;
 	public final Expression width;  //non null only for images declared with a size
 	public final Expression height;  //non null only for images declared with a size
-	
+	public int slot;
 
 	public Declaration(Token firstToken, Token type, Token name, Expression width, Expression height) {
 		super(firstToken);
