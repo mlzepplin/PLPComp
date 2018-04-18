@@ -102,21 +102,22 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 		declaration.slot = slot; slot++;
 		localVars.add(declaration);
 		Scanner.Kind decType = declaration.type;
-		if(decType== Scanner.Kind.KW_image){
+		if(decType == Scanner.Kind.KW_image){
 
 			if(declaration.height!=null &&declaration.width!=null){
 				//visit
-				declaration.height.visit(this,null);
-				declaration.width.visit(this,null);
+				declaration.width.visit(this,arg);
+				declaration.height.visit(this,arg);
 			}
 			else{
 				//load default values onto stack
-				mv.visitLdcInsn(defaultHeight);
+				//load constants onto stack
 				mv.visitLdcInsn(defaultWidth);
+				mv.visitLdcInsn(defaultHeight);
 			}
-			//gen code to instantiate image
+			//gen code to instantiate image, will visit method and put its output onto the top of stack
 			mv.visitMethodInsn(INVOKESTATIC, RuntimeImageSupport.className,"makeImage", RuntimeImageSupport.makeImageSig, false);
-			//and store instantiation to a var
+			//pop the tos and store instantiation to the 'current slot' in ASM's internal array
 			mv.visitVarInsn(ASTORE, declaration.slot);
 		}
 		return null;
@@ -167,8 +168,8 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 		}else if(operator == Scanner.Kind.OP_PLUS)
 		{
 			expression0.visit(this,arg);
-			expression1.visit(this,arg);
 			convertUsingOpcode(expression0,Type.INTEGER,I2F);
+			expression1.visit(this,arg);
 			convertUsingOpcode(expression1,Type.INTEGER,I2F);
 			//addition
 			mv.visitInsn(FADD);
@@ -180,8 +181,8 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 		else if(operator == Scanner.Kind.OP_MINUS)
 		{
 			expression0.visit(this,arg);
-			expression1.visit(this,arg);
 			convertUsingOpcode(expression0,Type.INTEGER,I2F);
+			expression1.visit(this,arg);
 			convertUsingOpcode(expression1,Type.INTEGER,I2F);
 			mv.visitInsn(FSUB);
 			if(inferredType==Type.INTEGER) {
@@ -254,7 +255,8 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 		mv.visitLabel(guardStartLabel);
 		expressionConditional.guard.visit(this,arg);
 		mv.visitLabel(guardEndLabel);
-		mv.visitJumpInsn(IFNE,falseExpStartLabel);
+		//IFEQ does equals check with zero
+		mv.visitJumpInsn(IFEQ,falseExpStartLabel);
 
 		mv.visitLabel(trueExpStartLabel);
 		expressionConditional.trueExpression.visit(this,arg);
@@ -336,14 +338,48 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 
 			if(expression.type == Type.FLOAT)
 				mv.visitInsn(F2I);
-		}
-		else if(function == Scanner.Kind.KW_float){
+
+		} else if(function == Scanner.Kind.KW_float){
 
 			if(expression.type == Type.INTEGER)
 				mv.visitInsn(I2F);
+
+		}else if(function == Scanner.Kind.KW_width){
+
+			mv.visitMethodInsn(INVOKESTATIC,RuntimeImageSupport.className,"getWidth",RuntimeImageSupport.getWidthSig,false);
+
+		}else if(function == Scanner.Kind.KW_height){
+
+			mv.visitMethodInsn(INVOKESTATIC,RuntimeImageSupport.className,"getHeight",RuntimeImageSupport.getHeightSig,false);
+
+		}else if(function == Scanner.Kind.KW_red){
+
+			colorHandler(expression.type,"getRed",RuntimePixelOps.getRedSig);
+
+		}else if(function == Scanner.Kind.KW_blue){
+
+			colorHandler(expression.type,"getBlue",RuntimePixelOps.getBlueSig);
+
+		}else if(function == Scanner.Kind.KW_green){
+
+			colorHandler(expression.type,"getGreen",RuntimePixelOps.getGreenSig);
+
+		}else if(function == Scanner.Kind.KW_alpha){
+
+			colorHandler(expression.type,"getAlpha",RuntimePixelOps.getAlphaSig);
 		}
 
+
 		return null;
+	}
+
+	public void colorHandler(Type type, String name,String desc){
+
+		//convert to integer first, then convert back
+		if(type==Type.FLOAT) mv.visitInsn(F2I);
+		mv.visitMethodInsn(INVOKESTATIC,RuntimePixelOps.className,name,desc);
+		if(type==Type.FLOAT) mv.visitInsn(I2F);
+
 	}
 
 	@Override
@@ -425,15 +461,10 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 		expression.visit(this, arg);
 		//negation
 		if(operator == Scanner.Kind.OP_MINUS){
-			if(inferredType == Type.INTEGER){
-				mv.visitInsn(INEG);
-			}
-			else if(inferredType == Type.FLOAT){
-				mv.visitInsn(FNEG);
-			}
+			convertUsingOpcode(expression,Type.INTEGER,INEG);
+			convertUsingOpcode(expression,Type.FLOAT,FNEG);
 		}
 		else if(operator == Scanner.Kind.OP_EXCLAMATION){
-
 
 			if(inferredType == Type.INTEGER){
 				//take a temp representation with all bits one
@@ -634,21 +665,18 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 
 		}else if(type==Type.IMAGE){
 			Declaration declaration =  statementInput.dec;
-			Expression height=declaration.height;
-			Expression width= declaration.width;
-			//TODO ---- DECLARATION-NAME?????
+			Expression width = declaration.width;
+			Expression height= declaration.height;
 			if(height == null && width == null){
 				//image retains its original size
-				mv.visitLdcInsn(defaultHeight);
-				mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;",false);
-				mv.visitLdcInsn(defaultWidth);
-				mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;",false);
+				mv.visitInsn(ACONST_NULL);
+				mv.visitInsn(ACONST_NULL);
 			}
 			else
 			{	//emplies height and width present
-				height.visit(this, null);
-				mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;",false);
 				width.visit(this, null);
+				mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;",false);
+				height.visit(this, null);
 				mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;",false);
 			}
 			mv.visitMethodInsn(INVOKESTATIC, RuntimeImageSupport.className,"readImage", RuntimeImageSupport.readImageSig,false);
@@ -704,9 +732,8 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 			}
 				break;
 			case IMAGE : {
-				//TODO --- CODEGEN???
-				CodeGenUtils.genLogTOS(GRADE, mv, type);
 				//make frame
+				CodeGenUtils.genLogTOS(GRADE, mv, type);
 				mv.visitMethodInsn(INVOKESTATIC, RuntimeImageSupport.className, "makeFrame", RuntimeImageSupport.makeFrameSig,false);
 				//pop it off
 				mv.visitInsn(POP);

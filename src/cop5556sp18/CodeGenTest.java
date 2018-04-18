@@ -14,6 +14,7 @@
 
 package cop5556sp18;
 
+import static cop5556sp18.RuntimeImageSupport.getPixel;
 import static org.junit.Assert.*;
 
 import java.awt.image.BufferedImage;
@@ -193,6 +194,7 @@ public class CodeGenTest {
 		show("Log:\n"+RuntimeLog.globalLog);
 		assertEquals("entering main;3;leaving main;",RuntimeLog.globalLog.toString());
 	}
-	
+
+
 
 }
