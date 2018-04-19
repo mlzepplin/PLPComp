@@ -181,9 +181,7 @@ public class CodeGenTest {
 		show("Log:\n "+RuntimeLog.globalLog);
 		assertEquals("entering main;leaving main;",RuntimeLog.globalLog.toString());
 	}
-	
 
-	
 	@Test
 	public void integerLit() throws Exception {
 		String prog = "intgegerLit";
