@@ -64,7 +64,7 @@ public static final int[] BITMASKS = {SELECT_ALPHA, SELECT_RED, SELECT_GRN, SELE
 	public static final String getSampleSig = "(II)I";
 	public static int getSample(int pixel, int color) {
 		assert ALPHA <= color && color <= BLUE : "illegal value for color in getSample";
-		int s = (pixel & BITMASKS[color]) >> BITOFFSETS[color];
+		int s = (pixel & BITMASKS[color]) >>> BITOFFSETS[color];
 		return s;
 	}
 	
@@ -82,25 +82,25 @@ public static final int[] BITMASKS = {SELECT_ALPHA, SELECT_RED, SELECT_GRN, SELE
 	/*extract red sample*/
 	public static final String getRedSig = "(I)I";
 	public static int getRed(int pixel) {
-		return (pixel & SELECT_RED) >> SHIFT_RED;
+		return (pixel & SELECT_RED) >>> SHIFT_RED;
 	}
 
 	/*	extract green sample*/
 	public static final String getGreenSig = "(I)I";
 	public static int getGreen(int pixel) {
-		return (pixel & SELECT_GRN) >> SHIFT_GRN;
+		return (pixel & SELECT_GRN) >>> SHIFT_GRN;
 	}
 
 	// extract blue sample
 	public static final String getBlueSig = "(I)I";
 	public static int getBlue(int pixel) {
-		return (pixel & SELECT_BLU) >> SHIFT_BLU;
+		return (pixel & SELECT_BLU) >>> SHIFT_BLU;
 	}
 	
 	// extract alpha sample
 	public static final String getAlphaSig = "(I)I";
 	public static int getAlpha(int pixel) {
-		return (pixel & SELECT_ALPHA) >> SHIFT_ALPHA;
+		return (pixel & SELECT_ALPHA) >>> SHIFT_ALPHA;
 	}
 
 	

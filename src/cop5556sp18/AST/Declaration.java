@@ -16,6 +16,7 @@ import cop5556sp18.Scanner.Kind;
  */
 
 import cop5556sp18.Scanner.Token;
+import org.objectweb.asm.Label;
 
 public class Declaration extends ASTNode {
 	
@@ -23,7 +24,9 @@ public class Declaration extends ASTNode {
 	public final String name;
 	public final Expression width;  //non null only for images declared with a size
 	public final Expression height;  //non null only for images declared with a size
+
 	public int slot;
+	public Label blockStartLabel, blockEndLabel;
 
 	public Declaration(Token firstToken, Token type, Token name, Expression width, Expression height) {
 		super(firstToken);

@@ -76,7 +76,7 @@ public class SymbolTable {
         Vector<TableEntry> v = table.get(name);
         if(v==null) return false;
         for(int i=v.size()-1;i>=0;i--){
-            if(v.get(i).scopeNum==currentScope) return true;
+            if(v.get(i).scopeNum == currentScope) return true;
         }
         return false;
     }

@@ -78,11 +78,24 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 
 	@Override
 	public Object visitBlock(Block block, Object arg) throws Exception {
-		Label blockStart=new Label();
+		Label blockStart = new Label();
+		Label blockEnd = new Label();
+
+		//visit the start label
 		mv.visitLabel(blockStart);
+		//then linearly execute
+		//all the internals (decs or statements), while
+		//passing start and end labels to declarations to
+		//take care of the nested blocks scoping and jumps
 		for (ASTNode node : block.decsOrStatements) {
+			if(node instanceof Declaration){
+				Declaration declaration = (Declaration)node;
+				declaration.blockStartLabel = blockStart;
+				declaration.blockEndLabel = blockEnd;
+			}
 			node.visit(this, null);
 		}
+		mv.visitLabel(blockEnd);
 		return null;
 	}
 
@@ -132,7 +145,200 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 		Type inferredType = expressionBinary.type;
 		Scanner.Kind operator = expressionBinary.op;
 
-		if(operator == Scanner.Kind.OP_TIMES){
+		//Labels
+		Label wasFalse = new Label();
+		Label wasTrue = new Label();
+		Label conditionalEndLabel = new Label();
+
+
+		if(operator == Scanner.Kind.OP_EQ){
+
+			expression0.visit(this, arg);
+			expression1.visit(this,arg);
+
+			if(expression0.getType()==Type.BOOLEAN || expression0.getType()==Type.INTEGER ){
+				//if not equal, then go to false statement
+				mv.visitJumpInsn(IF_ICMPNE, wasFalse);
+				//if true--continue and jump to end
+				mv.visitLdcInsn(true);
+				mv.visitJumpInsn(GOTO, conditionalEndLabel);
+				//false label
+				mv.visitLabel(wasFalse);
+				mv.visitLdcInsn(false);
+				//endLabel
+				mv.visitLabel(conditionalEndLabel);
+			}
+			else if(expression0.getType() == Type.FLOAT){
+
+				mv.visitInsn(FCMPG);
+				//if not equal, then go to false statement
+				mv.visitJumpInsn(IFNE, wasFalse);
+				//if true--continue and jump to end
+				mv.visitLdcInsn(true);
+				mv.visitJumpInsn(GOTO, conditionalEndLabel);
+				//false label
+				mv.visitLabel(wasFalse);
+				mv.visitLdcInsn(false);
+				//endLabel
+				mv.visitLabel(conditionalEndLabel);
+			}
+		}else if(operator == Scanner.Kind.OP_NEQ){
+
+			expression0.visit(this, arg);
+			expression1.visit(this,arg);
+
+			if(expression0.getType()==Type.BOOLEAN || expression0.getType()==Type.INTEGER ){
+				//if not equal, then go to false statement
+				mv.visitJumpInsn(IF_ICMPEQ, wasFalse);
+				//if true--continue and jump to end
+				mv.visitLdcInsn(true);
+				mv.visitJumpInsn(GOTO, conditionalEndLabel);
+				//false label
+				mv.visitLabel(wasFalse);
+				mv.visitLdcInsn(false);
+				//endLabel
+				mv.visitLabel(conditionalEndLabel);
+			}
+			else if(expression0.getType() == Type.FLOAT){
+
+				mv.visitInsn(FCMPG);
+				//if not equal, then go to true statement
+				mv.visitJumpInsn(IFNE, wasTrue);
+				//if true--continue and jump to end
+				mv.visitLdcInsn(false);
+				mv.visitJumpInsn(GOTO, conditionalEndLabel);
+				//true label
+				mv.visitLabel(wasTrue);
+				mv.visitLdcInsn(true);
+				//endLabel
+				mv.visitLabel(conditionalEndLabel);
+			}
+
+		}else if(operator == Scanner.Kind.OP_GT){
+
+			expression0.visit(this, arg);
+			expression1.visit(this,arg);
+
+			if(expression0.getType()==Type.BOOLEAN || expression0.getType()==Type.INTEGER ){
+				//if GT goto true
+				mv.visitJumpInsn(IF_ICMPGT, wasTrue);
+				//if false -- continue and jump to end
+				mv.visitLdcInsn(false);
+				mv.visitJumpInsn(GOTO, conditionalEndLabel);
+				//true label
+				mv.visitLabel(wasTrue);
+				mv.visitLdcInsn(true);
+				//endLabel
+				mv.visitLabel(conditionalEndLabel);
+			}
+			else if(expression0.getType() == Type.FLOAT){
+
+				mv.visitInsn(FCMPG);
+				//if not equal, then go to false statement
+				mv.visitJumpInsn(IFGT, wasTrue);
+				//if false--continue and jump to end
+				mv.visitLdcInsn(false);
+				mv.visitJumpInsn(GOTO, conditionalEndLabel);
+				//true label
+				mv.visitLabel(wasTrue);
+				mv.visitLdcInsn(true);
+				//endLabel
+				mv.visitLabel(conditionalEndLabel);
+			}
+		}else if(operator == Scanner.Kind.OP_LT){
+
+			expression0.visit(this, arg);
+			expression1.visit(this,arg);
+
+			if(expression0.getType()==Type.BOOLEAN || expression0.getType()==Type.INTEGER ){
+				//if GT goto true
+				mv.visitJumpInsn(IF_ICMPLT, wasTrue);
+				//if false -- continue and jump to end
+				mv.visitLdcInsn(false);
+				mv.visitJumpInsn(GOTO, conditionalEndLabel);
+				//true label
+				mv.visitLabel(wasTrue);
+				mv.visitLdcInsn(true);
+				//endLabel
+				mv.visitLabel(conditionalEndLabel);
+			}
+			else if(expression0.getType() == Type.FLOAT){
+
+				mv.visitInsn(FCMPG);
+				//if not equal, then go to false statement
+				mv.visitJumpInsn(IFLT, wasTrue);
+				//if false--continue and jump to end
+				mv.visitLdcInsn(false);
+				mv.visitJumpInsn(GOTO, conditionalEndLabel);
+				//true label
+				mv.visitLabel(wasTrue);
+				mv.visitLdcInsn(true);
+				//endLabel
+				mv.visitLabel(conditionalEndLabel);
+			}
+		}else if(operator == Scanner.Kind.OP_GE){
+
+			expression0.visit(this, arg);
+			expression1.visit(this,arg);
+
+			if(expression0.getType()==Type.BOOLEAN || expression0.getType()==Type.INTEGER ){
+				//if GT goto true
+				mv.visitJumpInsn(IF_ICMPGE, wasTrue);
+				//if false -- continue and jump to end
+				mv.visitLdcInsn(false);
+				mv.visitJumpInsn(GOTO, conditionalEndLabel);
+				//true label
+				mv.visitLabel(wasTrue);
+				mv.visitLdcInsn(true);
+				//endLabel
+				mv.visitLabel(conditionalEndLabel);
+			}
+			else if(expression0.getType() == Type.FLOAT){
+
+				mv.visitInsn(FCMPG);
+				//if not equal, then go to false statement
+				mv.visitJumpInsn(IFGE, wasTrue);
+				//if false--continue and jump to end
+				mv.visitLdcInsn(false);
+				mv.visitJumpInsn(GOTO, conditionalEndLabel);
+				//true label
+				mv.visitLabel(wasTrue);
+				mv.visitLdcInsn(true);
+				//endLabel
+				mv.visitLabel(conditionalEndLabel);
+			}
+		}else if(operator == Scanner.Kind.OP_LE){
+
+			expression0.visit(this, arg);
+			expression1.visit(this,arg);
+
+			if(expression0.getType()==Type.BOOLEAN || expression0.getType()==Type.INTEGER ){
+				//if GT goto true
+				mv.visitJumpInsn(IF_ICMPLE, wasTrue);
+				//if false -- continue and jump to end
+				mv.visitLdcInsn(false);
+				mv.visitJumpInsn(GOTO, conditionalEndLabel);
+				//true label
+				mv.visitLabel(wasTrue);
+				mv.visitLdcInsn(true);
+				//endLabel
+				mv.visitLabel(conditionalEndLabel);
+			}
+			else if(expression0.getType() == Type.FLOAT){
+
+				mv.visitInsn(FCMPG);
+				//if not equal, then go to false statement
+				mv.visitJumpInsn(IFLE, wasTrue);
+				//if false--continue and jump to end
+				mv.visitLdcInsn(false);
+				mv.visitJumpInsn(GOTO, conditionalEndLabel);
+				//true label
+				mv.visitLabel(wasTrue);
+				mv.visitLdcInsn(true);
+				//endLabel
+				mv.visitLabel(conditionalEndLabel);
+			}
+		}else if(operator == Scanner.Kind.OP_TIMES){
 			//converting everything to float for operation
 			//expresion 0
 			expression0.visit(this, arg);
@@ -386,16 +592,32 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 	public Object visitExpressionFunctionAppWithPixel(
 			ExpressionFunctionAppWithPixel expressionFunctionAppWithPixel,
 			Object arg) throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		Scanner.Kind function = expressionFunctionAppWithPixel.name;
+		expressionFunctionAppWithPixel.e0.visit(this,arg);
+		expressionFunctionAppWithPixel.e1.visit(this, arg);
+		if(function == Scanner.Kind.KW_polar_a || function == Scanner.Kind.KW_polar_r){
+			if(function == Scanner.Kind.KW_polar_a) {
+				mv.visitMethodInsn(INVOKESTATIC, Wrapper.className, "polara", Wrapper.polaraSignature, false);
+			}
+			else if(function == Scanner.Kind.KW_polar_r) {
+				mv.visitMethodInsn(INVOKESTATIC, Wrapper.className, "polarr", Wrapper.polarrSignature, false);
+			}
+
+		}else if(function == Scanner.Kind.KW_cart_x || function == Scanner.Kind.KW_cart_y){
+			if(function == Scanner.Kind.KW_cart_x) {
+				mv.visitMethodInsn(INVOKESTATIC, Wrapper.className, "cartx", Wrapper.cartxSignature, false);
+			}
+			else if(function == Scanner.Kind.KW_cart_y) {
+				mv.visitMethodInsn(INVOKESTATIC, Wrapper.className, "carty", Wrapper.cartySignature, false);
+			}
+		}
+		return null;
 	}
 
 	@Override
 	public Object visitExpressionIdent(ExpressionIdent expressionIdent,
 			Object arg) throws Exception {
-		String name = expressionIdent.name;
 		Type type = expressionIdent.type;
-
 		if(type == Type.INTEGER) {
 			mv.visitVarInsn(ILOAD,expressionIdent.dec.slot);
 		} else if(type == Type.BOOLEAN) {
@@ -422,16 +644,25 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 	@Override
 	public Object visitExpressionPixel(ExpressionPixel expressionPixel,
 			Object arg) throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		//load the declaration's slot on tos
+		mv.visitVarInsn(ALOAD,expressionPixel.dec.slot);
+		//visit and take pixel
+		expressionPixel.pixelSelector.visit(this,null);
+		mv.visitMethodInsn(INVOKESTATIC,RuntimeImageSupport.className,"getPixel",RuntimeImageSupport.getPixelSig,false);
+		return null;
 	}
 
 	@Override
 	public Object visitExpressionPixelConstructor(
 			ExpressionPixelConstructor expressionPixelConstructor, Object arg)
 			throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		//don't change order
+		expressionPixelConstructor.alpha.visit(this,arg);
+		expressionPixelConstructor.red.visit(this,arg);
+		expressionPixelConstructor.green.visit(this,arg);
+		expressionPixelConstructor.blue.visit(this,arg);
+		mv.visitMethodInsn(INVOKESTATIC, RuntimePixelOps.className, "makePixel",RuntimePixelOps.makePixelSig, false);
+		return null;
 	}
 
 	@Override
@@ -476,10 +707,6 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 			}else if(inferredType == Type.BOOLEAN){
 				mv.visitInsn(ICONST_1);
 				mv.visitInsn(IXOR);
-
-			}else if(inferredType == Type.FLOAT){
-				mv.visitLdcInsn(new Float(FLOAT.MAX_VALUE));
-				mv.visitInsn(IXOR);
 			}
 		}
 
@@ -513,22 +740,40 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 	@Override
 	public Object visitLHSPixel(LHSPixel lhsPixel, Object arg)
 			throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		mv.visitVarInsn(ALOAD, lhsPixel.dec.slot);
+		lhsPixel.pixelSelector.visit(this,arg);
+		mv.visitMethodInsn(INVOKESTATIC, RuntimeImageSupport.className, "setPixel", RuntimeImageSupport.setPixelSig, false);
+		return null;
 	}
 
 	@Override
 	public Object visitLHSSample(LHSSample lhsSample, Object arg)
 			throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		mv.visitVarInsn(ALOAD, lhsSample.dec.slot);
+		lhsSample.pixelSelector.visit(this,arg);
+		Scanner.Kind color = lhsSample.color;
+		if(color == Scanner.Kind.KW_alpha) {
+			mv.visitLdcInsn(RuntimePixelOps.ALPHA);
+		}
+		if(color == Scanner.Kind.KW_red) {
+			mv.visitLdcInsn(RuntimePixelOps.RED);
+		}
+		if(color == Scanner.Kind.KW_green) {
+			mv.visitLdcInsn(RuntimePixelOps.GREEN);
+		}
+		if(color == Scanner.Kind.KW_blue) {
+			mv.visitLdcInsn(RuntimePixelOps.BLUE);
+		}
+		mv.visitMethodInsn(INVOKESTATIC, RuntimeImageSupport.className, "updatePixelColor", RuntimeImageSupport.updatePixelColorSig, false);
+		return null;
 	}
 
 	@Override
 	public Object visitPixelSelector(PixelSelector pixelSelector, Object arg)
 			throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		pixelSelector.ex.visit(this,arg);
+		pixelSelector.ey.visit(this,arg);
+		return null;
 	}
 
 	@Override
@@ -631,8 +876,14 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 	@Override
 	public Object visitStatementIf(StatementIf statementIf, Object arg)
 			throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		Label wasFalse = new Label();
+		Label conditionalEnd = new Label();
+		statementIf.guard.visit(this,arg);
+		//IF QEUAL TO ZERO ==> was false, so jump to end
+		mv.visitJumpInsn(IFEQ,conditionalEnd);
+		statementIf.b.visit(this,arg);
+		mv.visitLabel(conditionalEnd);
+		return null;
 	}
 
 	@Override
@@ -760,15 +1011,45 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 	@Override
 	public Object visitStatementWhile(StatementWhile statementWhile, Object arg)
 			throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		Label whileStart = new Label();
+		Label whileEnd = new Label();
+		mv.visitLabel(whileStart);
+		statementWhile.guard.visit(this,arg);
+		mv.visitJumpInsn(IFEQ, whileEnd);
+		statementWhile.b.visit(this,arg);
+		mv.visitJumpInsn(GOTO,whileStart);
+		mv.visitLabel(whileEnd);
+		return null;
 	}
 
 	@Override
 	public Object visitStatementWrite(StatementWrite statementWrite, Object arg)
 			throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+
+		Scanner.Kind sourceType = statementWrite.sourceDec.type;
+		Scanner.Kind destType = statementWrite.destDec.type;
+
+		if(sourceType == Scanner.Kind.KW_int) {
+			mv.visitVarInsn(ILOAD,statementWrite.sourceDec.slot);
+		}
+		else if(sourceType == Scanner.Kind.KW_float) {
+			mv.visitVarInsn(FLOAD,statementWrite.sourceDec.slot);
+		}
+		else if(sourceType == Scanner.Kind.KW_filename || sourceType == Scanner.Kind.KW_image) {
+			mv.visitVarInsn(ALOAD, statementWrite.sourceDec.slot);
+		}
+
+		if(destType == Scanner.Kind.KW_int) {
+			mv.visitVarInsn(ILOAD,statementWrite.destDec.slot);
+		}
+		else if(destType == Scanner.Kind.KW_float) {
+			mv.visitVarInsn(FLOAD,statementWrite.destDec.slot);
+		}
+		else if(destType == Scanner.Kind.KW_filename || destType == Scanner.Kind.KW_image) {
+			mv.visitVarInsn(ALOAD, statementWrite.destDec.slot);
+		}
+		mv.visitMethodInsn(INVOKESTATIC,RuntimeImageSupport.className, "write", RuntimeImageSupport.writeSig);
+		return null;
 	}
 
 }

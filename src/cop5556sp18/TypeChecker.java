@@ -96,7 +96,6 @@ public class TypeChecker implements ASTVisitor {
 			throw new SemanticException(declaration.firstToken,"duplicate name declaration in scope");
 		}
 
-
 		if(declaration.width!=null){
 			declaration.width.visit(this,arg);
 			if((declaration.width.type== Types.Type.INTEGER && Types.getType(declaration.type)== Types.Type.IMAGE)){
