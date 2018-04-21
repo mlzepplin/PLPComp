@@ -36,13 +36,14 @@ public class SymbolTable {
     }
     public void enterScope(){
         currentScope = nextScope++;
-       // System.out.println("entered scope: "+currentScope);
+        System.out.println("entered scope: "+currentScope);
         scopeStack.push(currentScope);
     }
     public void leaveScope(){
-        //copeStack.pop();
-        currentScope = scopeStack.pop();
-       // System.out.println("exited scope, now current: "+currentScope);
+
+        scopeStack.pop();
+        if(!scopeStack.empty())currentScope = scopeStack.peek();
+        System.out.println("exited scope, now current: "+currentScope);
     }
 
     public Declaration lookup(String name){
