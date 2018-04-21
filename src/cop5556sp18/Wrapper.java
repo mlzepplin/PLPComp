@@ -19,12 +19,12 @@ public class Wrapper {
     public static String atanSignature = "(D)D";
 
     //a6
-    public static int cartx(float radius, float theta) {return (int)(radius * Math.cos(theta));}
-    public static int carty(float radius, float theta) {
+    public static int cartx(float radius,float theta) {return (int)(radius * Math.cos(theta));}
+    public static int carty(float radius,float theta) {
        return (int)(radius * Math.sin(theta));
     }
-    public static float polara(int a, int b) {return (float)  Math.atan2(a, b);}
-    public static float polarr(int a, int b){return (float) Math.hypot(a,b);}
+    public static float polara(int a,int b) {return (float)Math.atan2(b,a);}
+    public static float polarr(int a,int b){return (float)Math.hypot(a,b);}
 
 
     //a5
@@ -46,11 +46,5 @@ public class Wrapper {
     public static double atan(double a) {
         return Math.atan(a);
     }
-
-
-
-
-
-
 
 }

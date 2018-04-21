@@ -193,5 +193,4 @@ public class CodeGenTest {
 		assertEquals("entering main;3;leaving main;",RuntimeLog.globalLog.toString());
 	}
 
-
 }
